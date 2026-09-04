@@ -1,16 +1,22 @@
-# Documentação de Implementação JWT (.NET 8)
+Documentação Técnica: Implementação de Autenticação JWT no ASP.NET Core (.NET 8)
+Esta documentação apresenta a estrutura de arquivos necessária para implementar autenticação via JSON Web Token (JWT) em uma Web API .NET 8.
 
-## 1. Arquivo: `Program.cs`
-Responsável pela inicialização da aplicação, registro dos serviços do JWT e ativação dos middlewares de segurança.
+1. Instalação do Pacote Nuget
+Execute o comando no terminal do projeto para instalar a biblioteca de autenticação Bearer:
 
-```csharp
+Bash
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
+2. Configuração da Aplicação (Program.cs)
+O arquivo Program.cs é responsável por registrar o serviço de autenticação, validar os parâmetros do token e incluir os middlewares de segurança no pipeline.
+
+C#
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Chave secreta de autenticação (mínimo de 32 caracteres)
+// 1. Chave secreta de autenticação (deve ter no mínimo 32 caracteres)
 var secretKey = Encoding.ASCII.GetBytes("SUA_CHAVE_SUPER_SECRETA_E_LONGA_COM_32_CARACTERES!");
 
 // 2. Configura a Autenticação por JWT
@@ -36,19 +42,22 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// 3. Ativa os Middlewares de Segurança (A ordem importa!)
+// 3. Ativa os Middlewares de Segurança (Respeite esta ordem exata)
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
+3. Modelo de Transferência de Dados (DTOs/LoginDto.cs)
+Classe responsável por capturar o payload da requisição de autenticação na API.
 
+C#
+namespace SuaApi.DTOs;
 
-
-
-## 3. Arquivo: Controllers/AuthController.cs
-## Controller responsável pela rota pública de login e pela emissão do token JWT.
+public record LoginDto(string Email, string Senha);
+4. Controller de Autenticação (Controllers/AuthController.cs)
+Endpoint público responsável por validar as credenciais do usuário e assinar o token JWT.
 
 C#
 using System.IdentityModel.Tokens.Jwt;
@@ -67,13 +76,13 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public IActionResult Login([FromBody] LoginDto dto)
     {
-        // Validação de exemplo (Substituir pela busca no banco de dados)
+        // Validação de credenciais (Substituir pela busca no banco de dados)
         if (dto.Email != "admin@email.com" || dto.Senha != "123456")
         {
             return Unauthorized(new { mensagem = "E-mail ou senha inválidos." });
         }
 
-        // Configuração e geração do Token JWT
+        // Construção e assinatura do token JWT
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes("SUA_CHAVE_SUPER_SECRETA_E_LONGA_COM_32_CARACTERES!");
         
@@ -94,3 +103,48 @@ public class AuthController : ControllerBase
         return Ok(new { token = tokenHandler.WriteToken(token) });
     }
 }
+5. Controller Protegida (Controllers/TarefasController.cs)
+Exemplo de recurso privado que exige o envio prévio do token JWT no cabeçalho Authorization: Bearer <TOKEN>.
+
+C#
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace SuaApi.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize] // Restringe o acesso a requisições autenticadas
+public class TarefasController : ControllerBase
+{
+    [HttpGet]
+    public IActionResult Listar()
+    {
+        return Ok(new[] 
+        { 
+            new { id = 1, titulo = "Estudar para o SAEP" },
+            new { id = 2, titulo = "Testar rotas no Thunder Client" }
+        });
+    }
+}
+6. Como Testar no Thunder Client / Postman
+Gere o Token:
+
+Envie uma requisição POST para http://localhost:5000/api/auth/login
+
+Selecione a opção Body -> JSON e envie:
+
+JSON
+{
+  "email": "admin@email.com",
+  "senha": "123456"
+}
+Copie o valor da propriedade token retornada na resposta.
+
+Acesse o Endpoint Protegido:
+
+Crie uma nova requisição GET para http://localhost:5000/api/tarefas
+
+Vá até a aba Auth (ou Authorization), escolha Bearer Token e cole o token obtido.
+
+Clique em Send. A resposta deve ser o código 200 OK com os dados protegidos.
