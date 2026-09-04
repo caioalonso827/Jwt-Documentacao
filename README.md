@@ -91,7 +91,7 @@ dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
         }
     }
 
-## 4. 5. Controller Protegida (TarefasController.cs)
+## 5. Controller Protegida (TarefasController.cs)
 
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
