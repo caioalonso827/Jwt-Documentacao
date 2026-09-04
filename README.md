@@ -1,3 +1,15 @@
+Entendo a frustração! Vamos resolver isso sem estresse. Se os títulos não estão aparecendo bonitinhos ou visualmente formatados no VS Code, é porque você precisa abrir a Visualização (Preview) do Markdown ou salvar o arquivo com a extensão correta.
+
+Como ver os títulos e a formatação no VS Code:
+
+1. Nomeie o arquivo corretamente: Salve o arquivo com o nome README.md ou Guia.md (a extensão .md é obrigatória para o VS Code entender o Markdown).
+
+2. Abra a visualização formatada: No VS Code, com o arquivo aberto, aperte as teclas Ctrl + Shift + V (no Windows) ou Cmd + Shift + V (no Mac).
+
+3. Ou use o ícone do VS Code: No canto superior direito da tela do editor, clique no ícone que parece um livro/página com uma lupa.
+
+Se mesmo assim você quiser o documento completo puro para copiar de novo sem nenhuma interferência de chat, aqui está ele pronto:
+
 Documentação Técnica: Implementação de Autenticação JWT no ASP.NET Core (.NET 8)
 Esta documentação apresenta a estrutura de arquivos necessária para implementar autenticação via JSON Web Token (JWT) em uma Web API .NET 8.
 
@@ -85,7 +97,7 @@ public class AuthController : ControllerBase
         // Construção e assinatura do token JWT
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes("SUA_CHAVE_SUPER_SECRETA_E_LONGA_COM_32_CARACTERES!");
-        
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(new[]
@@ -94,7 +106,7 @@ public class AuthController : ControllerBase
             }),
             Expires = DateTime.UtcNow.AddHours(2),
             SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(key), 
+                new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256Signature)
         };
 
@@ -120,8 +132,8 @@ public class TarefasController : ControllerBase
     [HttpGet]
     public IActionResult Listar()
     {
-        return Ok(new[] 
-        { 
+        return Ok(new[]
+        {
             new { id = 1, titulo = "Estudar para o SAEP" },
             new { id = 2, titulo = "Testar rotas no Thunder Client" }
         });
@@ -141,7 +153,7 @@ JSON
 }
 Copie o valor da propriedade token retornada na resposta.
 
-Acesse o Endpoint Protegido:
+Acesse o Endpoint Protegida:
 
 Crie uma nova requisição GET para http://localhost:5000/api/tarefas
 
